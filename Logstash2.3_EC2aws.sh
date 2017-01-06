@@ -6,7 +6,7 @@ function UpdateInstallServices(){
 
 function InstallLogstash(){
 	sudo bash -c 'printf "[logstash-2.3]\nname=Logstash repository for 2.3.x packages\nbaseurl=https://packages.elastic.co/logstash/2.3/centos\ngpgcheck=1\ngpgkey=https://packages.elastic.co/GPG-KEY-elasticsearch\nenabled=1" > /etc/yum.repos.d/logstash.repo'
-	sudo yum install logstash.noarch -y
+	sudo yum install logstash -y
 }
 
 function InstallJava(){
@@ -31,7 +31,6 @@ function InstallJava(){
 }
 
 function DownloadPackages(){
-	sudo yum install git -y
 	cd /opt
 	sudo git clone https://github.com/elastic/elasticsearch-cloud-aws.git
 	sudo wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.5.0.zip
@@ -55,35 +54,20 @@ function InstallLogstashPlugin(){
 	gem install bundler
 	cd /opt/logstash-output-amazon_es/
 	sudo gem build logstash-output-amazon_es.gemspec
-	cd /opt/logstash-output-amazon_es/
-	sudo gem build logstash-output-amazon_es.gemspec
 	cd /opt/logstash
 	sudo ./bin/plugin install  vendor/bundle/jruby/1.9/cache/logstash-output-amazon_es-1.0-java.gem
 	sudo rpm -qa |grep logstash #logstash-2.3.4-1.noarch rpm -qa |grep elasticsearch #elasticsearch-5.0.1-1.noarch
 }
 
 function ConfigLogstash(){
-	sudo bash -c 'echo "
-	input {
-  		tcp {
-    			port => 8080
-    			codec => json_lines
-  		}
-	}
-	output {
-  		amazon_es {
-    			hosts => ["search-east-1.es.amazonaws.com"]
-    			region => "us-east-1"
-    			index => "devlogstash-%{+YYYY.MM.DD}"
-  		}
- 	stdout {codec => line}
-	}" > /etc/logstash/conf.d/logstash.conf'
+	cd ~ && cd aws-scripts/logstash/
+	cp logstash.conf /etc/logstash/conf.d/
+	cd ~
 }
 
 function StartLogstash(){
-	cd /opt/logstash/bin
-	sudo bash -c './logstash -f /etc/logstash/conf.d/logstash.conf &' 
-	cd ~
+	service logstash start
+	sudo chkconfig logstash on
 }
 
 #Steps
@@ -95,5 +79,3 @@ InstallElasticSearch
 InstallLogstashPlugin
 ConfigLogstash  #Change hosts
 StartLogstash
-
-
