@@ -60,7 +60,7 @@ function InstallLogstashPlugin(){
 }
 
 function ConfigLogstash(){
-	cd ~ && cd aws-scripts/logstash/
+	cd ~ && cd shellscript/logstash/
 	cp logstash.conf /etc/logstash/conf.d/
 	cd ~
 }
