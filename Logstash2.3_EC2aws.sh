@@ -66,7 +66,7 @@ function ConfigLogstash(){
 }
 
 function StartLogstash(){
-	service logstash start
+	sudo service logstash start
 	sudo chkconfig logstash on
 }
 
